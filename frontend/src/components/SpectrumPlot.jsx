@@ -1,5 +1,9 @@
 import React, { useMemo } from 'react';
-import Plot from 'react-plotly.js';
+import Plotly from 'plotly.js-dist-min';
+import createPlotlyComponentFactory from 'react-plotly.js/factory';
+
+const createPlotlyComponent = createPlotlyComponentFactory.default || createPlotlyComponentFactory;
+const Plot = createPlotlyComponent(Plotly);
 
 export default function SpectrumPlot({ result }) {
   const plotData = useMemo(() => {
