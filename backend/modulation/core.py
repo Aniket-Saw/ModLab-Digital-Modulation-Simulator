@@ -1,7 +1,7 @@
 import numpy as np
 
-def generate_random_bits(bit_count: int):
-    return np.random.randint(0, 2, bit_count).tolist()
+def generate_random_bits(n):
+     return list(np.random.randint(0, 2, n))
 
 def awgn(signal, snr_db):
     """
