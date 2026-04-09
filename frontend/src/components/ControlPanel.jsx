@@ -1,11 +1,16 @@
-import React from 'react';
+import React from "react";
 
-export default function ControlPanel({ config, setConfig, onSimulate, loading }) {
+export default function ControlPanel({
+  config,
+  setConfig,
+  onSimulate,
+  loading,
+}) {
   const handleChange = (e) => {
     const { name, value, type } = e.target;
     setConfig((prev) => ({
       ...prev,
-      [name]: type === 'number' ? Number(value) : value,
+      [name]: type === "number" ? Number(value) : value,
     }));
   };
 
@@ -69,7 +74,7 @@ export default function ControlPanel({ config, setConfig, onSimulate, loading })
           onChange={handleChange}
         />
       </div>
-      
+
       <div className="form-group">
         <label className="label">Carrier Amplitude</label>
         <input
@@ -93,9 +98,14 @@ export default function ControlPanel({ config, setConfig, onSimulate, loading })
         />
       </div>
 
-      <button onClick={onSimulate} disabled={loading} style={{ marginTop: '1rem' }}>
-        {loading ? 'Simulating...' : 'Run Simulation'}
-      </button>
+      <div className="form-group">
+        <button
+          onClick={onSimulate}
+          disabled={loading}
+          style={{ marginTop: "1rem" }}>
+          {loading ? "Simulating..." : "Run Simulation"}
+        </button>
+      </div>
     </div>
   );
 }
