@@ -26,7 +26,7 @@ function App() {
       setResult(data);
     } catch (err) {
       console.error(err);
-      setError('Simulation failed. Check parameters and try again.');
+      setError("Simulation failed. Check parameters and try again.");
     } finally {
       setLoading(false);
     }
@@ -34,13 +34,14 @@ function App() {
 
   return (
     <div className="app-container">
-      <ControlPanel 
-        config={config} 
-        setConfig={setConfig} 
-        onSimulate={handleSimulate} 
+      <ControlPanel
+        config={config}
+        setConfig={setConfig}
+        onSimulate={handleSimulate}
         loading={loading}
+        onResult={setResult}
       />
-      
+
       <main className="main-content">
         {error && <div style={{ color: 'var(--error)', marginBottom: '1rem', padding: '1rem', background: 'rgba(239,68,68,0.1)', borderRadius: '8px' }}>{error}</div>}
         
