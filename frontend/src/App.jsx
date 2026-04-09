@@ -1,25 +1,22 @@
 import React, { useState } from 'react';
 import ControlPanel from './components/ControlPanel';
-import ResultsSummary from './components/ResultsSummary';
-import WaveformPlot from './components/WaveformPlot';
-import SpectrumPlot from './components/SpectrumPlot';
+import ProcessVisualizer from './components/ProcessVisualizer';
 import { simulateModulation } from './api';
 
 function App() {
   const [config, setConfig] = useState({
     scheme: 'BPSK',
-    bit_count: 50,
+    bit_count: 20,
     bit_rate: 10,
     carrier_frequency: 50,
     amplitude: 1.0,
     sampling_frequency: 1000,
-    snr_db: 5.0,
+    snr_db: 10.0,
   });
 
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('waveform');
 
   const handleSimulate = async () => {
     setLoading(true);
@@ -45,54 +42,36 @@ function App() {
       />
       
       <main className="main-content">
-        {error && <div style={{ color: 'var(--error)', marginBottom: '1rem' }}>{error}</div>}
+        {error && <div style={{ color: 'var(--error)', marginBottom: '1rem', padding: '1rem', background: 'rgba(239,68,68,0.1)', borderRadius: '8px' }}>{error}</div>}
         
-        <ResultsSummary result={result} />
-
-        {result && (
-          <div className="card">
-            <div className="tabs">
-              <button 
-                className={`tab-btn ${activeTab === 'waveform' ? 'active' : ''}`}
-                onClick={() => setActiveTab('waveform')}
-              >
-                Time Domain
-              </button>
-              <button 
-                className={`tab-btn ${activeTab === 'spectrum' ? 'active' : ''}`}
-                onClick={() => setActiveTab('spectrum')}
-              >
-                Frequency Domain
-              </button>
-            </div>
-
-            <div className="tab-content" style={{ minHeight: '400px' }}>
-              {activeTab === 'waveform' && <WaveformPlot result={result} />}
-              {activeTab === 'spectrum' && <SpectrumPlot result={result} />}
-            </div>
-            
-            <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
-              <h3>Input vs Output Bits</h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem', fontSize: '0.9rem' }}>
-                <div style={{ flex: '1 1 100%' }}>
-                  <strong>Tx: </strong>
-                  <span style={{ color: 'var(--primary-color)' }}>{result.input_bits.join('')}</span>
-                </div>
-                <div style={{ flex: '1 1 100%' }}>
-                  <strong>Rx: </strong>
-                  <span style={{ color: result.bit_errors > 0 ? 'var(--error)' : 'var(--success)' }}>
-                    {result.demodulated_bits.join('')}
-                  </span>
-                </div>
-              </div>
+        {result && <ProcessVisualizer result={result} config={config} />}
+        
+        {!result && !loading && (
+          <div className="welcome-card">
+            <div className="welcome-icon">📡</div>
+            <h2>Digital Modulation Lab</h2>
+            <p>Configure parameters on the left and click <strong>"Run Simulation"</strong> to visualize the complete digital communication process.</p>
+            <div className="welcome-stages">
+              <span>① Bit Generation</span>
+              <span>→</span>
+              <span>② Modulation</span>
+              <span>→</span>
+              <span>③ AWGN Channel</span>
+              <span>→</span>
+              <span>④ Demodulation</span>
+              <span>→</span>
+              <span>⑤ BER Analysis</span>
+              <span>→</span>
+              <span>⑥ FFT</span>
             </div>
           </div>
         )}
-        
-        {!result && !loading && (
-          <div className="card" style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)' }}>
-            <h2>Welcome to Digital Modulation Analyzer</h2>
-            <p>Select your parameters on the left and click "Run Simulation" to begin.</p>
+
+        {loading && (
+          <div className="welcome-card">
+            <div className="spinner"></div>
+            <h2>Running Simulation...</h2>
+            <p>Computing modulation, noise, and demodulation pipeline.</p>
           </div>
         )}
       </main>

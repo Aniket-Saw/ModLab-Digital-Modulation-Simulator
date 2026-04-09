@@ -16,8 +16,11 @@ class SimulationResult(BaseModel):
     transmitted_signal: List[float]
     received_signal: List[float]
     demodulated_bits: List[int]
+    noise_signal: List[float]
+    demod_signal: List[float]
     bit_errors: int
     ber: float
+    theoretical_ber: float
     frequency_axis: List[float]
     spectrum: List[float]
     time_axis: List[float]

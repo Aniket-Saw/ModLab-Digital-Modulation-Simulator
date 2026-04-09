@@ -75,6 +75,7 @@ input:focus, select:focus {
   font-weight: 500;
 }
 
+/* ====== Layout ====== */
 .app-container {
   display: flex;
   height: 100vh;
@@ -84,6 +85,7 @@ input:focus, select:focus {
 
 .sidebar {
   width: 320px;
+  min-width: 320px;
   background: var(--bg-panel);
   border-right: 1px solid var(--border-color);
   display: flex;
@@ -129,32 +131,100 @@ input:focus, select:focus {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-.tabs {
+/* ====== Stage Cards ====== */
+.process-visualizer {
   display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.stage-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.3s ease;
+}
+
+.stage-card:hover {
+  border-color: rgba(96, 165, 250, 0.3);
+}
+
+.stage-header {
+  display: flex;
+  align-items: center;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--border-color);
-  padding-bottom: 0.5rem;
+  background: rgba(15, 23, 42, 0.4);
 }
 
-.tab-btn {
-  background: transparent;
-  color: var(--text-muted);
-  padding: 0.5rem;
-  border-radius: 0;
-  border-bottom: 2px solid transparent;
+.stage-badge {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #a78bfa);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #fff;
 }
 
-.tab-btn:hover {
-  background: transparent;
+.stage-title {
+  font-size: 1rem;
+  font-weight: 600;
   color: var(--text-main);
 }
 
-.tab-btn.active {
-  color: var(--primary-color);
-  border-bottom-color: var(--primary-color);
+.stage-description {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+  font-family: 'Inter', monospace;
 }
 
+.stage-content {
+  padding: 0.75rem;
+}
+
+/* ====== BER Comparison ====== */
+.ber-comparison {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.ber-card {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ber-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.ber-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: 'Inter', monospace;
+}
+
+/* ====== Summary Grid ====== */
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -181,4 +251,98 @@ input:focus, select:focus {
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+/* ====== Welcome Card ====== */
+.welcome-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  gap: 1rem;
+  flex: 1;
+}
+
+.welcome-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.welcome-card h2 {
+  font-size: 1.6rem;
+  background: linear-gradient(90deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.welcome-card p {
+  color: var(--text-muted);
+  max-width: 500px;
+  font-size: 0.95rem;
+}
+
+.welcome-stages {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.welcome-stages span:not(:nth-child(even)) {
+  background: rgba(96, 165, 250, 0.1);
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  color: #93c5fd;
+  font-weight: 500;
+}
+
+/* ====== Spinner ====== */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ====== Tabs (kept for legacy compatibility) ====== */
+.tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+}
+
+.tab-btn {
+  background: transparent;
+  color: var(--text-muted);
+  padding: 0.5rem;
+  border-radius: 0;
+  border-bottom: 2px solid transparent;
+}
+
+.tab-btn:hover {
+  background: transparent;
+  color: var(--text-main);
+}
+
+.tab-btn.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
 }
