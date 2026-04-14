@@ -286,24 +286,85 @@ input:focus, select:focus {
   font-size: 0.95rem;
 }
 
-.welcome-stages {
+.diagram-container {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 0.5rem;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 0.5rem;
-  font-size: 0.82rem;
-  color: var(--text-muted);
+  width: 100%;
+  text-align: left;
 }
 
-.welcome-stages span:not(:nth-child(even)) {
-  background: rgba(96, 165, 250, 0.1);
-  border: 1px solid rgba(96, 165, 250, 0.2);
-  padding: 0.3rem 0.6rem;
-  border-radius: 6px;
+.diagram-step {
+  display: flex;
+  gap: 1rem;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.25rem;
+  align-items: center;
+  transition: border-color 0.3s;
+}
+
+.diagram-step:hover {
+  border-color: rgba(96, 165, 250, 0.3);
+}
+
+.step-number {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), #a78bfa);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+
+.step-content h4 {
+  font-size: 1.05rem;
+  color: var(--text-main);
+  margin-bottom: 0.35rem;
+}
+
+.step-content p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.step-content strong {
   color: #93c5fd;
   font-weight: 500;
+}
+
+.diagram-arrow {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  opacity: 0.6;
+}
+
+.analysis-group {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+
+.analysis-box {
+  flex: 1;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  padding: 1.25rem;
+  border-radius: 8px;
+  transition: transform 0.2s;
+}
+
+.analysis-box h4 {
+  color: #a78bfa;
 }
 
 /* ====== Spinner ====== */

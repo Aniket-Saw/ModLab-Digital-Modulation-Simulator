@@ -3,9 +3,10 @@ from typing import List, Optional
 
 class SimulationConfig(BaseModel):
     scheme: str = Field(..., description="Modulation scheme: BASK, BFSK, BPSK")
-    bit_count: int = Field(10, description="Number of random bits to generate")
+    bit_count: int = Field(10, gt=0, description="Number of random bits to generate")
     bit_rate: float = Field(1.0, description="Bit rate in Hz")
     carrier_frequency: float = Field(5.0, description="Carrier frequency in Hz")
+    carrier_frequency_2: Optional[float] = Field(None, description="Optional: Second carrier frequency (Space frequency) specifically for BFSK")
     amplitude: float = Field(1.0, description="Carrier amplitude")
     sampling_frequency: float = Field(100.0, description="Sampling frequency in Hz")
     snr_db: float = Field(10.0, description="Signal to Noise Ratio in decibels")

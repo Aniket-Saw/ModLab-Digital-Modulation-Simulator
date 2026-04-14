@@ -5,14 +5,13 @@ def generate_random_bits(bit_count: int):
     """Generate i.i.d. bits: b[n] ~ Bernoulli(0.5)"""
     return np.random.randint(0, 2, bit_count).tolist()
 
-def awgn(signal, snr_db):
+def awgn(signal, snr_db, bit_rate, fs):
     """
     Adds Additive White Gaussian Noise to a signal.
 
-    Given target SNR in dB:
-        SNR_dB = 10 * log10(P_s / P_n)
-        P_n = P_s / 10^(SNR_dB / 10)
-        n[k] ~ N(0, P_n)
+    Assuming target SNR is actually Eb/N0 in dB. 
+    Bandpass SNR is calculated based on noise bandwidth (fs/2).
+    SNR = (Eb/N0) * (bit_rate / (fs/2))
 
     Returns: (noisy_signal, noise_only)
     """
@@ -20,7 +19,11 @@ def awgn(signal, snr_db):
     if signal_power == 0:
         noise = np.zeros(len(signal))
         return signal.copy(), noise
-    snr_linear = 10 ** (snr_db / 10.0)
+        
+    eb_n0_linear = 10 ** (snr_db / 10.0)
+    noise_bandwidth = fs / 2.0
+    snr_linear = eb_n0_linear * (bit_rate / noise_bandwidth)
+    
     noise_power = signal_power / snr_linear
     noise = np.sqrt(noise_power) * np.random.randn(len(signal))
     return signal + noise, noise
@@ -58,80 +61,62 @@ def simulate_bask(bits, bit_rate, fc, fs, A, snr_db):
     tx_signal = m_t * c_t
 
     # Channel
-    rx_signal, noise_signal = awgn(tx_signal, snr_db)
+    rx_signal, noise_signal = awgn(tx_signal, snr_db, bit_rate, fs)
 
     # Coherent demodulation: multiply by carrier, integrate over each bit
     mixer_signal = rx_signal * c_t
     threshold = (A ** 2) / 4.0  # midpoint between 0 and A^2/2
 
-    demod_bits = []
-    for i in range(N):
-        start = i * samples_per_bit
-        end = start + samples_per_bit
-        y_n = np.mean(mixer_signal[start:end]) * 2  # factor of 2/Tb normalisation
-        demod_bits.append(1 if y_n > threshold else 0)
+    reshaped_mixer = mixer_signal.reshape(-1, samples_per_bit)
+    y_ns = np.mean(reshaped_mixer, axis=1) * 2  # factor of 2/Tb normalisation
+    demod_bits = (y_ns > threshold).astype(int).tolist()
 
     return t, tx_signal, rx_signal, demod_bits, noise_signal, mixer_signal
 
 # ---------------------------------------------------------------------------
 # BFSK  (Binary Frequency Shift Keying)
 # ---------------------------------------------------------------------------
-def simulate_bfsk(bits, bit_rate, fc, fs, A, snr_db):
+def simulate_bfsk(bits, bit_rate, fc, fs, A, snr_db, fc2=None):
     """
-    Two carrier frequencies: f1 = fc (for bit 1), f2 = fc + 2*bit_rate (for bit 0).
-
-    s_BFSK(t) = A*cos(2*pi*f1*t)  if b[n]=1
-                A*cos(2*pi*f2*t)  if b[n]=0
-
-    Coherent demodulation (two correlators):
-        y1[n] = (2/Tb) integral{ r(t)*cos(2*pi*f1*t) dt }
-        y2[n] = (2/Tb) integral{ r(t)*cos(2*pi*f2*t) dt }
-        b_hat = 1 if y1 > y2, else 0
-
-    Returns: (t, tx_signal, rx_signal, demod_bits, noise_signal, mixer_signal)
+    Two carrier frequencies: f1 = fc (for bit 1), f2 = fc + bit_rate (for bit 0).
+    Ensures orthogonal spacing and continuous phase FSK.
     """
-    f1 = fc
-    f2 = fc + 2 * bit_rate
+    if fc2 is not None:
+        f1 = fc
+        f2 = fc2
+    else:
+        # Force carriers to be integer multiples of the bit rate to guarantee
+        # Continuous Phase FSK (phase is 0 mod 2pi at every bit boundary)
+        f1 = max(bit_rate, round(fc / bit_rate) * bit_rate)
+        f2 = f1 + bit_rate
+
     Tb = 1.0 / bit_rate
     samples_per_bit = int(fs * Tb)
     N = len(bits)
     total_samples = N * samples_per_bit
     t = np.arange(total_samples) / fs
 
-    tx_signal = np.zeros(total_samples)
-
-    for i, bit in enumerate(bits):
-        start = i * samples_per_bit
-        end = start + samples_per_bit
-        t_bit = t[start:end]
-        if bit == 1:
-            tx_signal[start:end] = A * np.cos(2 * np.pi * f1 * t_bit)
-        else:
-            tx_signal[start:end] = A * np.cos(2 * np.pi * f2 * t_bit)
+    # Vectorized Signal Generation
+    f_instantaneous = np.array([f1 if b == 1 else f2 for b in bits])
+    f_m = np.repeat(f_instantaneous, samples_per_bit)
+    tx_signal = A * np.cos(2 * np.pi * f_m * t)
 
     # Channel
-    rx_signal, noise_signal = awgn(tx_signal, snr_db)
+    rx_signal, noise_signal = awgn(tx_signal, snr_db, bit_rate, fs)
 
     # Coherent demodulation — two correlators
     # We store the difference (corr1 - corr0) as the mixer signal for visualization
-    mixer_signal = np.zeros(total_samples)
-    demod_bits = []
-    for i in range(N):
-        start = i * samples_per_bit
-        end = start + samples_per_bit
-        t_bit = t[start:end]
-        r_bit = rx_signal[start:end]
+    corr1_signal = rx_signal * np.cos(2 * np.pi * f1 * t)
+    corr2_signal = rx_signal * np.cos(2 * np.pi * f2 * t)
+    mixer_signal = corr1_signal - corr2_signal
 
-        corr1_samples = r_bit * np.cos(2 * np.pi * f1 * t_bit)
-        corr2_samples = r_bit * np.cos(2 * np.pi * f2 * t_bit)
+    reshaped_corr1 = corr1_signal.reshape(-1, samples_per_bit)
+    reshaped_corr2 = corr2_signal.reshape(-1, samples_per_bit)
 
-        # Store difference of correlator outputs for visualization
-        mixer_signal[start:end] = corr1_samples - corr2_samples
+    y1 = np.mean(reshaped_corr1, axis=1)
+    y2 = np.mean(reshaped_corr2, axis=1)
 
-        y1 = np.mean(corr1_samples)
-        y2 = np.mean(corr2_samples)
-
-        demod_bits.append(1 if y1 > y2 else 0)
+    demod_bits = (y1 > y2).astype(int).tolist()
 
     return t, tx_signal, rx_signal, demod_bits, noise_signal, mixer_signal
 
@@ -169,16 +154,14 @@ def simulate_bpsk(bits, bit_rate, fc, fs, A, snr_db):
     tx_signal = A * m_t * c_t
 
     # Channel
-    rx_signal, noise_signal = awgn(tx_signal, snr_db)
+    rx_signal, noise_signal = awgn(tx_signal, snr_db, bit_rate, fs)
 
     # Coherent demodulation
     mixer_signal = rx_signal * c_t
-    demod_bits = []
-    for i in range(N):
-        start = i * samples_per_bit
-        end = start + samples_per_bit
-        y_n = np.mean(mixer_signal[start:end])
-        demod_bits.append(1 if y_n >= 0 else 0)
+    
+    reshaped_mixer = mixer_signal.reshape(-1, samples_per_bit)
+    y_ns = np.mean(reshaped_mixer, axis=1)
+    demod_bits = (y_ns >= 0).astype(int).tolist()
 
     return t, tx_signal, rx_signal, demod_bits, noise_signal, mixer_signal
 

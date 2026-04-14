@@ -7,10 +7,15 @@ export default function ControlPanel({
   loading,
 }) {
   const handleChange = (e) => {
-    const { name, value, type } = e.target;
+    let { name, value, type } = e.target;
+    
+    if (name === "manual_bits") {
+      value = value.replace(/[^01]/g, '');
+    }
+
     setConfig((prev) => ({
       ...prev,
-      [name]: type === "number" ? Number(value) : value,
+      [name]: type === "number" && value !== "" ? Number(value) : value,
     }));
   };
 
@@ -31,7 +36,19 @@ export default function ControlPanel({
       </div>
 
       <div className="form-group">
-        <label className="label">Bit Count</label>
+        <label className="label">Manual Bit Stream</label>
+        <input
+          type="text"
+          name="manual_bits"
+          value={config.manual_bits || ""}
+          onChange={handleChange}
+          placeholder="e.g. 1011001"
+        />
+        <p style={{ opacity: 0.8, fontSize: '0.75rem', marginTop: '0.5rem' }}>Overrides Random Bit Count if provided.</p>
+      </div>
+
+      <div className="form-group">
+        <label className="label">Random Bit Count</label>
         <input
           type="number"
           name="bit_count"
@@ -39,6 +56,8 @@ export default function ControlPanel({
           max="1000"
           value={config.bit_count}
           onChange={handleChange}
+          disabled={config.manual_bits && config.manual_bits.length > 0}
+          style={{ opacity: config.manual_bits && config.manual_bits.length > 0 ? 0.3 : 1 }}
         />
       </div>
 
@@ -54,7 +73,9 @@ export default function ControlPanel({
       </div>
 
       <div className="form-group">
-        <label className="label">Carrier Frequency (Hz)</label>
+        <label className="label">
+          {config.scheme === 'BFSK' ? 'Mark Frequency "f1" (Hz)' : 'Carrier Frequency (Hz)'}
+        </label>
         <input
           type="number"
           name="carrier_frequency"
@@ -63,6 +84,23 @@ export default function ControlPanel({
           onChange={handleChange}
         />
       </div>
+
+      {config.scheme === 'BFSK' && (
+        <div className="form-group" style={{ background: 'rgba(59,130,246,0.1)', padding: '1rem', borderRadius: '8px' }}>
+          <label className="label">Space Frequency "f2" (Hz)</label>
+          <input
+            type="number"
+            name="carrier_frequency_2"
+            min="1"
+            value={config.carrier_frequency_2}
+            onChange={handleChange}
+            placeholder="Auto"
+          />
+          <p style={{ opacity: 0.85, fontSize: '0.75rem', marginTop: '0.75rem', lineHeight: '1.4' }}>
+            <strong>Tip:</strong> For Continuous Phase FSK (minimal splatter), leave this blank for automatic orthogonal spacing, or ensure f_1 and f_2 are integer multiples of the Bit Rate ({config.bit_rate} Hz).
+          </p>
+        </div>
+      )}
 
       <div className="form-group">
         <label className="label">Sampling Frequency (Hz)</label>

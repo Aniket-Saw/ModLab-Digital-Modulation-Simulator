@@ -27,7 +27,7 @@ def simulate(config: SimulationConfig):
     elif config.scheme.upper() == "BPSK":
         t, tx, rx, demod, noise, mixer = simulate_bpsk(bits, config.bit_rate, config.carrier_frequency, config.sampling_frequency, config.amplitude, config.snr_db)
     elif config.scheme.upper() == "BFSK":
-        t, tx, rx, demod, noise, mixer = simulate_bfsk(bits, config.bit_rate, config.carrier_frequency, config.sampling_frequency, config.amplitude, config.snr_db)
+        t, tx, rx, demod, noise, mixer = simulate_bfsk(bits, config.bit_rate, config.carrier_frequency, config.sampling_frequency, config.amplitude, config.snr_db, config.carrier_frequency_2)
     else:
         raise HTTPException(status_code=400, detail="Invalid modulation scheme. Choose BASK, BPSK, or BFSK.")
 

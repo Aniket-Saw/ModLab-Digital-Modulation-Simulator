@@ -25,21 +25,23 @@ export default function SpectrumPlot({ result }) {
     return <div className="card">Run a simulation to view the spectrum.</div>;
   }
 
+  const layout = useMemo(() => ({
+    title: 'Frequency Domain Spectrum',
+    paper_bgcolor: 'transparent',
+    plot_bgcolor: 'transparent',
+    font: { color: '#f8fafc', family: 'Inter' },
+    xaxis: { title: 'Frequency (Hz)', gridcolor: '#334155' },
+    yaxis: { title: 'Magnitude', gridcolor: '#334155' },
+    margin: { l: 50, r: 20, t: 50, b: 50 },
+    autosize: true,
+    showlegend: false
+  }), []);
+
   return (
     <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
       <Plot
         data={plotData}
-        layout={{
-          title: 'Frequency Domain Spectrum',
-          paper_bgcolor: 'transparent',
-          plot_bgcolor: 'transparent',
-          font: { color: '#f8fafc', family: 'Inter' },
-          xaxis: { title: 'Frequency (Hz)', gridcolor: '#334155' },
-          yaxis: { title: 'Magnitude', gridcolor: '#334155' },
-          margin: { l: 50, r: 20, t: 50, b: 50 },
-          autosize: true,
-          showlegend: false
-        }}
+        layout={layout}
         useResizeHandler={true}
         style={{ width: '100%', height: '400px' }}
       />
